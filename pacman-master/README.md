@@ -103,3 +103,4 @@ Here are just a few that we know about:
  - LiveWires for providing some code from a Pacman implementation (used / modified with permission).
  - The LINQS lab from UCSC.
  - Graduates of the CMPS 140 class who have helped pave the way for future classes (their identities are immortalized in the git history).
+ - 
