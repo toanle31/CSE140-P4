@@ -13,17 +13,23 @@ def createTeam(firstIndex, secondIndex, isRed,
     and will be False if the blue team is being created.
     """
 
-    firstAgent = reflection.qualifiedImport(first)
-    secondAgent = AttackAgent
+    # Make sure that AttackAgent is initialized with secondIndex
+    #   this is because the updates go through index in increasing order
+    #   And we will need to access some defense data inside AttackAgent
 
+    defenseAgent = DefenseAgent(firstIndex) 
+    attackAgent = AttackAgent(secondIndex)
+    # giving attack agent a reference of our defenseAgent
+    # so attackAgent have access to defenseAgent's features
+    attackAgent.defenseAgent = defenseAgent
     return [
-        firstAgent(firstIndex),
-        secondAgent(secondIndex),
+        defenseAgent,
+        attackAgent
     ]
 class AttackAgent(ReflexCaptureAgent):
     def __init__(self, index, **kwargs):
-        print("AttackAgent init")
         super().__init__(index)
+        self.defenseAgent = None
 
     def getFeatures(self, gameState, action):
         features = counter.Counter()
@@ -83,13 +89,13 @@ class AttackAgent(ReflexCaptureAgent):
         # note: weights shouldn't be too large, but once our base is cleared 
         # it will be 0 anyways, so it wouldn't be too much of a problem
         # we will just use distance to nearest attacker and if our agent is a braveghost
-
         # note: also maybe we can borrow some weights from the defenseAgent for this as well
         attackers = [enemy for enemy in enemies if enemy.isPacman() and enemy.getPosition() is not None]
         if (len(attackers) > 0 and agentState.isBraveGhost()):
             dists = [self.getMazeDistance(agentPos, attacker.getPosition()) for attacker in attackers]
             distanceToAttacker = min(dists)
             features["defenseAssist"] = distanceToAttacker
+            
         return features
     # these weights can use improvements
     def getWeights(self, gameState, action):
@@ -103,19 +109,56 @@ class AttackAgent(ReflexCaptureAgent):
             "isPacman": -45,
             "defenseAssist": -15
         }
-"""
+
 class DefenseAgent(ReflexCaptureAgent):
+    # Right now this is just the provided ReflexDefenseAgent
+    # remove these comments when done implementing the agent
     def __init__(self, index, **kwargs):
         super().__init__(index)
+        self.features = None
+        self.weights = None
+
     def getFeatures(self, gameState, action):
         features = counter.Counter()
         successor = self.getSuccessor(gameState, action)
+
         agentState = successor.getAgentState(self.index)
         agentPos = agentState.getPosition()
 
-        return features
-    def getWeights(self, gameState, action):
-        return {
+        # Computes whether we're on defense (1) or offense (0).
+        features['onDefense'] = 1
+        if (agentState.isPacman()):
+            features['onDefense'] = 0
 
+        # Computes distance to invaders we can see.
+        enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+        invaders = [a for a in enemies if a.isPacman() and a.getPosition() is not None]
+        features['numInvaders'] = len(invaders)
+
+        if (len(invaders) > 0):
+            dists = [self.getMazeDistance(agentPos, a.getPosition()) for a in invaders]
+            features['invaderDistance'] = min(dists)
+
+        if (action == Directions.STOP):
+            features['stop'] = 1
+
+        rev = Directions.REVERSE[gameState.getAgentState(self.index).getDirection()]
+        if (action == rev):
+            features['reverse'] = 1
+        
+        # make sure to set self.features = features
+        # we will need to use DefenseAgent.features
+        # because we don't want to call getFeatures again to cut down on calculation time
+        self.features = features
+        return self.features
+
+    def getWeights(self, gameState, action):
+        # same with getFeatures, make sure to set self.weights = weights before returning
+        self.weights = {
+            'numInvaders': -1000,
+            'onDefense': 100,
+            'invaderDistance': -10,
+            'stop': -100,
+            'reverse': -2
         }
-"""
+        return self.weights
