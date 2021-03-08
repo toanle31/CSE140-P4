@@ -12,10 +12,6 @@ def createTeam(firstIndex, secondIndex, isRed,
     isRed is True if the red team is being created,
     and will be False if the blue team is being created.
     """
-
-    # Make sure that AttackAgent is initialized with secondIndex
-    #   this is because the updates go through index in increasing order
-    #   And we will need to access some defense data inside AttackAgent
     defenseAgent = DefenseAgent(firstIndex) 
     attackAgent = AttackAgent(secondIndex)
     return [
@@ -101,7 +97,7 @@ class AttackAgent(ReflexCaptureAgent):
             "stop": -50,
             "reverse": -2,
             "isPacman": -45,
-            "defenseAssist": -15
+            "defenseAssist": -65
         }
 
 class DefenseAgent(ReflexCaptureAgent):
