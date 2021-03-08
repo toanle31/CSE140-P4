@@ -46,15 +46,19 @@ class AttackAgent(ReflexCaptureAgent):
             dists = [self.getMazeDistance(agentPos, defender.getPosition()) for defender in defenders]
             distanceToDefender = min(dists)
             # Only need to be very scared and run away if it's enemy's defender is too close
-            features["defenderDistance"] = distanceToDefender if distanceToDefender < 3 else 0
+            features["defenderDistance"] = 2 ** (2 - distanceToDefender)
 
         # FEATURE: Power capsules
-        # We prioritize getting power capsules if there are more than 1 defenders
+        # We prioritize getting power capsules if there are more than 0 defenders
         # note: there aren't too many capsules on the map, so most of the time it's 0
         capsuleList = self.getCapsules(successor)
-        if (len(capsuleList) > 0 and len(defenders) > 0): 
-            distanceToCapsule = min([self.getMazeDistance(agentPos, capsule) for capsule in capsuleList])
-            features["capsules"] = distanceToCapsule
+        if (len(capsuleList) > 0): 
+            if (len(defenders) > 0):
+                dists = [self.getMazeDistance(agentPos, capsule) for capsule in capsuleList]
+                distanceToCapsule = min(dists)
+                features["capsules"] = distanceToCapsule
+            else:
+                features["capsules"] = -15
 
         # FEATURE: stop
         # We want to avoid stopping if possible
@@ -64,8 +68,6 @@ class AttackAgent(ReflexCaptureAgent):
         # FEATURE: isPacman
         # We want our attack agent to go straight to the enemy base
         # So we do negative weights when we're in our own base
-        # note: this weight shouldn't be too large because we want to
-        # also help our defender sometimes.
         if not agentState.isPacman():
             features["isPacman"] = 1
         """
@@ -86,7 +88,7 @@ class AttackAgent(ReflexCaptureAgent):
         return {
             "score": 100,
             "distanceToFood": -2,
-            "defenderDistance": 10,
+            "defenderDistance": -1,
             "capsules": -2.5,
             "stop": -50,
             "isPacman": -45
@@ -111,10 +113,14 @@ class DefenseAgent(ReflexCaptureAgent):
             features['onDefense'] = 0
 
         # Computes distance to invaders we can see.
-        enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
-        invaders = [a for a in enemies if a.getPosition() is not None]
+        opponents = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+        enemies = [opponent for opponent in opponents if opponent.getPosition() is not None]
+        invaders = [enemy for enemy in enemies if enemy.isPacman()]
 
-        if (len(invaders) > 0):
+        if (len(enemies) > 0):
+            dists = [self.getMazeDistance(agentPos, a.getPosition()) for a in enemies]
+            features['invaderDistance'] = min(dists)
+        elif (len(invaders) > 0):
             dists = [self.getMazeDistance(agentPos, a.getPosition()) for a in invaders]
             features['invaderDistance'] = min(dists)
 
@@ -125,7 +131,7 @@ class DefenseAgent(ReflexCaptureAgent):
 
     def getWeights(self, gameState, action):
         return {
-            'onDefense': 1000,
-            'invaderDistance': -1.5,
+            'onDefense': 500,
+            'invaderDistance': -2.5,
             'reverse': -2
         }
