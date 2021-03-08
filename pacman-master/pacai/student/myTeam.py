@@ -104,7 +104,7 @@ class AttackAgent(ReflexCaptureAgent):
     def getWeights(self, gameState, action):
         return {
             "score": 100,
-            "distanceToFood": -2.5,
+            "distanceToFood": -2,
             "defenderDistance": 8.5,
             "capsules": -2.5,
             "stop": -50,
