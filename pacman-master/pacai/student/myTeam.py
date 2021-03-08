@@ -13,8 +13,8 @@ def createTeam(firstIndex, secondIndex, isRed,
     and will be False if the blue team is being created.
     """
 
-    firstAgent = reflection.qualifiedImport(first)
-    secondAgent = reflection.qualifiedImport(second)
+    firstAgent = AttackAgent
+    secondAgent = AttackAgent
 
     return [
         firstAgent(firstIndex),
@@ -22,7 +22,9 @@ def createTeam(firstIndex, secondIndex, isRed,
     ]
 class AttackAgent(ReflexCaptureAgent):
     def __init__(self, index, **kwargs):
+        print("AttackAgent init")
         super().__init__(index)
+
     def getFeatures(self, gameState, action):
         features = counter.Counter()
         successor = self.getSuccessor(gameState, action)
@@ -50,7 +52,7 @@ class AttackAgent(ReflexCaptureAgent):
         #   there are more than one BraveGhost
         #   length of defenders should be 0 if there are no BraveGhost
         #   meaning we don't care if defenders are scared
-        capsuleList = self.getCapsules(successor).asList()
+        capsuleList = self.getCapsules(successor)
         if (len(capsuleList) > 0 and len(defenders) > 0): 
             distanceToCapsule = min([self.getMazeDistance(agentPos, capsule) for capsule in capsuleList])
             features["capsules"] = distanceToCapsule
