@@ -74,7 +74,7 @@ class AttackAgent(ReflexCaptureAgent):
         # also help our defender sometimes.
         if not agentState.isPacman():
             features["isPacman"] = 1
-
+        """
         # FEATURE: defense assist
         # We want to assist our defense agent when we get sent back to our base
         # note: weight shouldn't be too large, but once our base is cleared 
@@ -84,7 +84,7 @@ class AttackAgent(ReflexCaptureAgent):
             dists = [self.getMazeDistance(agentPos, attacker.getPosition()) for attacker in attackers]
             distanceToAttacker = min(dists)
             features["defenseAssist"] = distanceToAttacker
-
+        """
         return features
 
     # these weights can use improvements
@@ -96,8 +96,7 @@ class AttackAgent(ReflexCaptureAgent):
             "capsules": -2.5,
             "stop": -50,
             "reverse": -2,
-            "isPacman": -45,
-            "defenseAssist": -65
+            "isPacman": -45
         }
 
 class DefenseAgent(ReflexCaptureAgent):
@@ -120,15 +119,11 @@ class DefenseAgent(ReflexCaptureAgent):
 
         # Computes distance to invaders we can see.
         enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
-        invaders = [a for a in enemies if a.isPacman() and a.getPosition() is not None]
-        features['numInvaders'] = len(invaders)
+        invaders = [a for a in enemies if a.getPosition() is not None]
 
         if (len(invaders) > 0):
             dists = [self.getMazeDistance(agentPos, a.getPosition()) for a in invaders]
             features['invaderDistance'] = min(dists)
-
-        if (action == Directions.STOP):
-            features['stop'] = 1
 
         rev = Directions.REVERSE[gameState.getAgentState(self.index).getDirection()]
         if (action == rev):
@@ -137,9 +132,7 @@ class DefenseAgent(ReflexCaptureAgent):
 
     def getWeights(self, gameState, action):
         return {
-            'numInvaders': -1000,
-            'onDefense': 100,
-            'invaderDistance': -10,
-            'stop': -100,
+            'onDefense': 1000,
+            'invaderDistance': -1.5,
             'reverse': -2
         }
