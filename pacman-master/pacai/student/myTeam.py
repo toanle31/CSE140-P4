@@ -61,12 +61,6 @@ class AttackAgent(ReflexCaptureAgent):
         if (action == Directions.STOP):
             features["stop"] = 1
 
-        # FEATURE: reverse
-        # We want to avoid reversing if possible
-        reverse = Directions.REVERSE[gameState.getAgentState(self.index).getDirection()]
-        if (action == reverse):
-            features["reverse"] = 1
-
         # FEATURE: isPacman
         # We want our attack agent to go straight to the enemy base
         # So we do negative weights when we're in our own base
@@ -92,10 +86,9 @@ class AttackAgent(ReflexCaptureAgent):
         return {
             "score": 100,
             "distanceToFood": -2,
-            "defenderDistance": 8.5,
+            "defenderDistance": 10,
             "capsules": -2.5,
             "stop": -50,
-            "reverse": -2,
             "isPacman": -45
         }
 
