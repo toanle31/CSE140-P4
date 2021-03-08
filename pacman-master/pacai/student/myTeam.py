@@ -16,12 +16,8 @@ def createTeam(firstIndex, secondIndex, isRed,
     # Make sure that AttackAgent is initialized with secondIndex
     #   this is because the updates go through index in increasing order
     #   And we will need to access some defense data inside AttackAgent
-
     defenseAgent = DefenseAgent(firstIndex) 
     attackAgent = AttackAgent(secondIndex)
-    # giving attack agent a reference of our defenseAgent
-    # so attackAgent have access to defenseAgent's features
-    attackAgent.defenseAgent = defenseAgent
     return [
         defenseAgent,
         attackAgent
@@ -29,7 +25,6 @@ def createTeam(firstIndex, secondIndex, isRed,
 class AttackAgent(ReflexCaptureAgent):
     def __init__(self, index, **kwargs):
         super().__init__(index)
-        self.defenseAgent = None
 
     def getFeatures(self, gameState, action):
         features = counter.Counter()
@@ -88,10 +83,6 @@ class AttackAgent(ReflexCaptureAgent):
         # We want to assist our defense agent when we get sent back to our base
         # note: weight shouldn't be too large, but once our base is cleared 
         # these weights will be 0, so it wouldn't be too much of a problem
-
-        # for now it is just distance to the nearest attacker
-        defenseFeatures = self.defenseAgent.features
-        defenseWeights = self.defenseAgent.weights
         attackers = [enemy for enemy in enemies if enemy.isPacman() and enemy.getPosition() is not None]
         if (len(attackers) > 0 and agentState.isBraveGhost()):
             dists = [self.getMazeDistance(agentPos, attacker.getPosition()) for attacker in attackers]
@@ -118,8 +109,6 @@ class DefenseAgent(ReflexCaptureAgent):
     # remove these comments when done implementing the agent
     def __init__(self, index, **kwargs):
         super().__init__(index)
-        self.features = None
-        self.weights = None
 
     def getFeatures(self, gameState, action):
         features = counter.Counter()
@@ -148,20 +137,13 @@ class DefenseAgent(ReflexCaptureAgent):
         rev = Directions.REVERSE[gameState.getAgentState(self.index).getDirection()]
         if (action == rev):
             features['reverse'] = 1
-        
-        # make sure to set self.features = features
-        # we will need to use DefenseAgent.features
-        # because we don't want to call getFeatures again to cut down on calculation time
-        self.features = features
-        return self.features
+        return features
 
     def getWeights(self, gameState, action):
-        # same with getFeatures, make sure to set self.weights = weights before returning
-        self.weights = {
+        return {
             'numInvaders': -1000,
             'onDefense': 100,
             'invaderDistance': -10,
             'stop': -100,
             'reverse': -2
         }
-        return self.weights
