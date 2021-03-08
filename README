@@ -1,2 +1,12 @@
 Team Members:
 - Toan Le
+- Shishir Kapoor
+- 
+
+Designs: 
+    Final: -- Details about final designs will go here --
+        AttackAgent:
+        - A reflex agent with 5 features (not final). This agent prioritize going over to enemy's base to collect food. It will run away from enemies when they're Brave and collect capsules when there are more than one Brave ghost in enemy's base.
+        DefenseAgent:
+
+    Other: -- Details about other attempts/designs will go here --
