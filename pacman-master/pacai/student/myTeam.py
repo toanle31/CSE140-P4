@@ -86,17 +86,20 @@ class AttackAgent(ReflexCaptureAgent):
 
         # FEATURE: defense assist
         # We want to assist our defense agent when we get sent back to our base
-        # note: weights shouldn't be too large, but once our base is cleared 
-        # it will be 0 anyways, so it wouldn't be too much of a problem
-        # we will just use distance to nearest attacker and if our agent is a braveghost
-        # note: also maybe we can borrow some weights from the defenseAgent for this as well
+        # note: weight shouldn't be too large, but once our base is cleared 
+        # these weights will be 0, so it wouldn't be too much of a problem
+
+        # for now it is just distance to the nearest attacker
+        defenseFeatures = self.defenseAgent.features
+        defenseWeights = self.defenseAgent.weights
         attackers = [enemy for enemy in enemies if enemy.isPacman() and enemy.getPosition() is not None]
         if (len(attackers) > 0 and agentState.isBraveGhost()):
             dists = [self.getMazeDistance(agentPos, attacker.getPosition()) for attacker in attackers]
             distanceToAttacker = min(dists)
             features["defenseAssist"] = distanceToAttacker
-            
+
         return features
+
     # these weights can use improvements
     def getWeights(self, gameState, action):
         return {
